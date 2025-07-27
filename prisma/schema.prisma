@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enum de regras
+enum Regra {
+  admin
+  funcionario
+}
+
+// Modelo de usuário
+model Usuario {
+  id         Int      @id @default(autoincrement())
+  nome       String
+  email      String   @unique
+  senha      String
+  regra      Regra    // Usa o enum declarado acima
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+
+model Categoria {
+  id          Int       @id @default(autoincrement())
+  nome        String    @unique
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  produtos    Produto[]
+}
+
+model Produto {
+  id             Int             @id @default(autoincrement())
+  nome           String
+  marca          String
+  categoriaId    Int
+  estoque        Int
+  preco          Float
+  descricao      String?
+  tipo           String
+  cliente        String
+  precoCusto     Float
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+
+  categoria      Categoria       @relation(fields: [categoriaId], references: [id])
+  vendaProdutos  VendaProduto[]
+}
+
+model Venda {
+  id             Int             @id @default(autoincrement())
+  data           DateTime        @default(now())
+  total          Float
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  vendaProdutos  VendaProduto[]
+}
+
+model VendaProduto {
+  id           Int      @id @default(autoincrement())
+  venda        Venda    @relation(fields: [vendaId], references: [id])
+  vendaId      Int
+
+  produto      Produto  @relation(fields: [produtoId], references: [id])
+  produtoId    Int
+
+  quantidade   Int
+  precoVenda   Float
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
